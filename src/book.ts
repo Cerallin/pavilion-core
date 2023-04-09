@@ -1,7 +1,6 @@
-import { books } from '@googleapis/books';
+import * as google from '@googleapis/books';
 import { MetaManager, MetaOption } from './manager';
 
-// using isbn as uniqID
 interface BookOption extends MetaOption {
     isbn: number
 }
@@ -23,11 +22,11 @@ export default class BookManager extends MetaManager {
     };
 
     uniqID(option: BookOption): string {
-        return '' + option.isbn;
+        return '' + option.isbn; // to string
     }
 
     async downloadInfo(option: BookOption): Promise<BookInfo> {
-        const { status, data } = await books('v1').volumes.list({
+        const { status, data } = await google.books('v1').volumes.list({
             q: `isbn:${option.isbn}`,
             maxResults: 1,
         })

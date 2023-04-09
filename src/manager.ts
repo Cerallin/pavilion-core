@@ -1,7 +1,9 @@
 import * as fs from 'fs';
+import { logger } from 'hexo-log';
 
 export interface MetaConfig {
-    dbPath: string
+    dbPath: string,
+    logger?,
 };
 
 export interface MetaOption { };
