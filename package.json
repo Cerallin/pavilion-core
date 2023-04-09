@@ -1,0 +1,26 @@
+{
+  "name": "pavilion-core",
+  "version": "1.0.0",
+  "description": "Metadata manager for anime, books, comics, games and music.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cerallin/pavilion-core.git"
+  },
+  "author": "Cerallin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Cerallin/pavilion-core/issues"
+  },
+  "homepage": "https://github.com/Cerallin/pavilion-core#readme",
+  "dependencies": {
+    "hexo-util": "^3.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}
