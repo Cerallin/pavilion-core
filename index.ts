@@ -1,6 +1,5 @@
 import BookManager from "./src/book";
-import BookInfo from "./src/book";
-import { MetaConfig } from './types';
+import { MetaConfig } from './src/manager';
 
 module.exports.MetaManager = class {
     config: MetaConfig;
@@ -9,8 +8,6 @@ module.exports.MetaManager = class {
 
     constructor(config: MetaConfig) {
         this.config = config;
-        this.book = new BookManager({
-            dbPath: this.config.dbPath + '/books'
-        });
+        this.book = new BookManager(config);
     }
 }

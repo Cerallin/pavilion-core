@@ -1,8 +1,10 @@
 import { books } from '@googleapis/books';
-import { MetaManager, MetaOption } from '../types';
+import { MetaManager, MetaOption } from './manager';
 
 // using isbn as uniqID
-interface BookOption extends MetaOption { }
+interface BookOption extends MetaOption {
+    isbn: number
+}
 
 interface BookInfo {
     title?: string;
@@ -14,16 +16,26 @@ interface BookInfo {
 }
 
 export default class BookManager extends MetaManager {
+    dbFilename: string = "books.json";
+
+    DBPath(): string {
+        return this.config.dbPath + '/' + this.dbFilename;
+    };
+
+    uniqID(option: BookOption): string {
+        return '' + option.isbn;
+    }
+
     async downloadInfo(option: BookOption): Promise<BookInfo> {
         const { status, data } = await books('v1').volumes.list({
-            q: `isbn:${option.uniqID}`,
+            q: `isbn:${option.isbn}`,
             maxResults: 1,
         })
         if (status !== 200 || !data.totalItems || !data.items?.length)
             return {};
         else {
             const volumeInfo = data.items[0].volumeInfo;
-            return {
+            const bookInfo = {
                 title: volumeInfo?.title,
                 authors: volumeInfo?.authors,
                 publishDate: volumeInfo?.publishedDate,
@@ -37,6 +49,8 @@ export default class BookManager extends MetaManager {
                     volumeInfo?.imageLinks?.thumbnail ||
                     volumeInfo?.imageLinks?.smallThumbnail
             };
+            this.setCache(option, bookInfo);
+            return bookInfo;
         }
     }
 }
