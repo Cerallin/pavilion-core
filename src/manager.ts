@@ -16,7 +16,7 @@ export abstract class MetaManager {
 
     abstract uniqID(option: MetaOption): string;
 
-    abstract downloadInfo(option: MetaOption): Promise<MetaInfo>;
+    abstract fetchInfo(option: MetaOption): Promise<MetaInfo>;
 
     constructor(config: MetaConfig) {
         this.config = config;
@@ -32,7 +32,7 @@ export abstract class MetaManager {
     }
 
     // Get cached or stored meta info.
-    fetchInfo(option: MetaOption): MetaInfo | {} {
+    cachedInfo(option: MetaOption): MetaInfo {
         if (!this.inCache(option)) { // check cache first
             const filename = this.DBPath();
             if (fs.existsSync(filename)) { // or load from file
@@ -42,6 +42,16 @@ export abstract class MetaManager {
         if (!this.inCache(option)) // no existence
             return {};
         return this.fetchCache(option);
+    }
+
+    async get(option: MetaOption): Promise<MetaInfo> {
+        function isEmpty(obj: Object) { return Object.keys(obj).length === 0; }
+        function merge(...objList: Object[]) { return Object.assign({}, ...objList); }
+
+        const cache = merge(this.cachedInfo(option), { cached: true });
+        if (!isEmpty(cache))
+            return cache;
+        return merge(await this.fetchInfo(option), { cached: false });
     }
 
     abstract DBPath(): string;

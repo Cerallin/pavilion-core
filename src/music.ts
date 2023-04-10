@@ -58,7 +58,7 @@ export default class MusicManager extends MetaManager {
         return headers.location
     }
 
-    async downloadInfo(option: MusicOption): Promise<MusicInfo> {
+    async fetchInfo(option: MusicOption): Promise<MusicInfo> {
         const discID = option.discID;
         const iRel = await mbApi.lookupRelease(discID);
         let musicInfo: MusicInfo = {

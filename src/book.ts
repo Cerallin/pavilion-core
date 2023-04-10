@@ -25,7 +25,7 @@ export default class BookManager extends MetaManager {
         return '' + option.isbn; // to string
     }
 
-    async downloadInfo(option: BookOption): Promise<BookInfo> {
+    async fetchInfo(option: BookOption): Promise<BookInfo> {
         const { status, data } = await google.books('v1').volumes.list({
             q: `isbn:${option.isbn}`,
             maxResults: 1,
