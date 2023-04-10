@@ -1,4 +1,4 @@
-import { MusicBrainzApi } from 'musicbrainz-api';
+import { MusicBrainzApi, ICoverArtArchive } from 'musicbrainz-api';
 import { MetaManager, MetaOption } from './manager';
 import { name, version } from '../package.json';
 import axios from 'axios';
@@ -39,26 +39,40 @@ export default class MusicManager extends MetaManager {
         return option.discID;
     }
 
+    async browseArtists(discID: string, limit: number = 3): Promise<string[]> {
+        const res = await mbApi.browseArtists({ release: discID, limit: limit });
+        return res.artists.map(artist => artist.name);
+    }
+
+    async coverArt(discID: string, caArchive: ICoverArtArchive): Promise<string> {
+        if (!caArchive.front) {
+            return "";
+        }
+        const { headers } = await axios.get(
+            `https://coverartarchive.org/release/${discID}/front`, {
+            maxRedirects: 0,
+            validateStatus: function (status) {
+                return status == 307 || (status <= 200 && status < 300);
+            },
+        });
+        return headers.location
+    }
+
     async downloadInfo(option: MusicOption): Promise<MusicInfo> {
-        const iRel = await mbApi.lookupRelease(option.discID);
-        // cover art
-        const ca = iRel['cover-art-archive'];
+        const discID = option.discID;
+        const iRel = await mbApi.lookupRelease(discID);
         let musicInfo: MusicInfo = {
             title: iRel.title,
-            artists: iRel['artist-credit']?.map(iac => iac.artist.name),
             publishDate: iRel.date,
             language: iRel['text-representation'].language,
         };
-        if (ca.front) {
-            const { status, data, headers } = await axios.get(
-                `https://coverartarchive.org/release/${option.discID}/front`, {
-                maxRedirects: 0,
-                validateStatus: function (status) {
-                    return status == 307 || (status <= 200 && status < 300);
-                },
-            });
-            musicInfo.cover = headers.location
-        }
+        // artists and coverArt
+        const [artists, coverArt] = await Promise.all([
+            this.browseArtists(discID),
+            this.coverArt(discID, iRel['cover-art-archive']),
+        ]);
+        musicInfo.artists = artists;
+        musicInfo.cover = coverArt;
 
         this.setCache(option, musicInfo);
         return musicInfo;
