@@ -1,7 +1,7 @@
 import * as google from '@googleapis/books';
-import { MetaManager, MetaOption } from './manager';
+import { MetaManager, MetaOptions } from './manager';
 
-interface BookOption extends MetaOption {
+interface BookOptions extends MetaOptions {
     isbn: number
 }
 
@@ -21,13 +21,13 @@ export default class BookManager extends MetaManager {
         return this.config.dbPath + '/' + this.dbFilename;
     };
 
-    uniqID(option: BookOption): string {
-        return '' + option.isbn; // to string
+    uniqID(options: BookOptions): string {
+        return '' + options.isbn; // to string
     }
 
-    async fetchInfo(option: BookOption): Promise<BookInfo> {
+    async fetchInfo(options: BookOptions): Promise<BookInfo> {
         const { status, data } = await google.books('v1').volumes.list({
-            q: `isbn:${option.isbn}`,
+            q: `isbn:${options.isbn}`,
             maxResults: 1,
         })
         if (status !== 200 || !data.totalItems || !data.items?.length)
@@ -48,7 +48,7 @@ export default class BookManager extends MetaManager {
                     volumeInfo?.imageLinks?.thumbnail ||
                     volumeInfo?.imageLinks?.smallThumbnail
             };
-            this.setCache(option, bookInfo);
+            this.setCache(options, bookInfo);
             return bookInfo;
         }
     }

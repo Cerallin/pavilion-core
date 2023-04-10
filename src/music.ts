@@ -1,10 +1,10 @@
 import { MusicBrainzApi, ICoverArtArchive } from 'musicbrainz-api';
-import { MetaManager, MetaOption } from './manager';
+import { MetaManager, MetaOptions } from './manager';
 import { name, version } from '../package.json';
 import axios from 'axios';
 
 const config = {
-    // API base URL, default: 'https://musicbrainz.org' (optional)
+    // API base URL, default: 'https://musicbrainz.org' (optionsal)
     baseUrl: 'https://musicbrainz.org',
 
     appName: name,
@@ -16,7 +16,7 @@ const config = {
 
 const mbApi = new MusicBrainzApi(config);
 
-interface MusicOption extends MetaOption {
+interface MusicOptions extends MetaOptions {
     discID: string
 }
 
@@ -35,8 +35,8 @@ export default class MusicManager extends MetaManager {
         return this.config.dbPath + '/' + this.dbFilename;
     };
 
-    uniqID(option: MusicOption): string {
-        return option.discID;
+    uniqID(options: MusicOptions): string {
+        return options.discID;
     }
 
     async browseArtists(discID: string, limit: number = 3): Promise<string[]> {
@@ -58,8 +58,8 @@ export default class MusicManager extends MetaManager {
         return headers.location
     }
 
-    async fetchInfo(option: MusicOption): Promise<MusicInfo> {
-        const discID = option.discID;
+    async fetchInfo(options: MusicOptions): Promise<MusicInfo> {
+        const discID = options.discID;
         const iRel = await mbApi.lookupRelease(discID);
         let musicInfo: MusicInfo = {
             title: iRel.title,
@@ -74,7 +74,7 @@ export default class MusicManager extends MetaManager {
         musicInfo.artists = artists;
         musicInfo.cover = coverArt;
 
-        this.setCache(option, musicInfo);
+        this.setCache(options, musicInfo);
         return musicInfo;
     }
 }

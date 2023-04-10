@@ -6,7 +6,7 @@ export interface MetaConfig {
     logger?,
 };
 
-export interface MetaOption { };
+export interface MetaOptions { };
 
 export interface MetaInfo { };
 
@@ -14,9 +14,9 @@ export abstract class MetaManager {
     config: MetaConfig;
     cache: Object = {};
 
-    abstract uniqID(option: MetaOption): string;
+    abstract uniqID(options: MetaOptions): string;
 
-    abstract fetchInfo(option: MetaOption): Promise<MetaInfo>;
+    abstract fetchInfo(options: MetaOptions): Promise<MetaInfo>;
 
     constructor(config: MetaConfig) {
         this.config = config;
@@ -32,26 +32,26 @@ export abstract class MetaManager {
     }
 
     // Get cached or stored meta info.
-    cachedInfo(option: MetaOption): MetaInfo {
-        if (!this.inCache(option)) { // check cache first
+    cachedInfo(options: MetaOptions): MetaInfo {
+        if (!this.inCache(options)) { // check cache first
             const filename = this.DBPath();
             if (fs.existsSync(filename)) { // or load from file
                 this.cache = this.loadFile(filename);
             }
         }
-        if (!this.inCache(option)) // no existence
+        if (!this.inCache(options)) // no existence
             return {};
-        return this.fetchCache(option);
+        return this.fetchCache(options);
     }
 
-    async get(option: MetaOption): Promise<MetaInfo> {
+    async get(options: MetaOptions): Promise<MetaInfo> {
         function isEmpty(obj: Object) { return Object.keys(obj).length === 0; }
         function merge(...objList: Object[]) { return Object.assign({}, ...objList); }
 
-        const cache = merge(this.cachedInfo(option), { cached: true });
+        const cache = merge(this.cachedInfo(options), { cached: true });
         if (!isEmpty(cache))
             return cache;
-        return merge(await this.fetchInfo(option), { cached: false });
+        return merge(await this.fetchInfo(options), { cached: false });
     }
 
     abstract DBPath(): string;
@@ -61,15 +61,15 @@ export abstract class MetaManager {
     }
 
 
-    inCache(option: MetaOption): boolean {
-        return this.cache && this.uniqID(option) in this.cache;
+    inCache(options: MetaOptions): boolean {
+        return this.cache && this.uniqID(options) in this.cache;
     }
 
-    setCache(option: MetaOption, metaInfo: MetaInfo) {
-        this.cache[this.uniqID(option)] = metaInfo;
+    setCache(options: MetaOptions, metaInfo: MetaInfo) {
+        this.cache[this.uniqID(options)] = metaInfo;
     }
 
-    fetchCache(option: MetaOption): MetaInfo {
-        return this.cache[this.uniqID(option)];
+    fetchCache(options: MetaOptions): MetaInfo {
+        return this.cache[this.uniqID(options)];
     }
 }
