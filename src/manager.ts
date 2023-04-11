@@ -1,24 +1,24 @@
 import * as fs from 'fs';
 import { logger } from 'hexo-log';
 
-export interface MetaConfig {
+export interface IMetaConfig {
     dbPath: string,
     logger?,
 };
 
-export interface MetaOptions { };
+export interface IMetaOptions { };
 
-export interface MetaInfo { };
+export interface IMetaInfo { };
 
 export abstract class MetaManager {
-    config: MetaConfig;
+    config: IMetaConfig;
     cache: Object = {};
 
-    abstract uniqID(options: MetaOptions): string;
+    abstract uniqID(options: IMetaOptions): string;
 
-    abstract fetchInfo(options: MetaOptions): Promise<MetaInfo>;
+    abstract fetchInfo(options: IMetaOptions): Promise<IMetaInfo>;
 
-    constructor(config: MetaConfig) {
+    constructor(config: IMetaConfig) {
         this.config = config;
         // check if dbPath exists
         if (!fs.existsSync(config.dbPath)) {
@@ -32,8 +32,8 @@ export abstract class MetaManager {
     }
 
     // Get cached or stored meta info.
-    cachedInfo(options: MetaOptions): MetaInfo {
-        if (!this.inCache(options)) { // check cache first
+    cachedInfo(options: IMetaOptions): IMetaInfo {
+        if (!Object.keys(this.cache).length) { // check cache first
             const filename = this.DBPath();
             if (fs.existsSync(filename)) { // or load from file
                 this.cache = this.loadFile(filename);
@@ -44,12 +44,13 @@ export abstract class MetaManager {
         return this.fetchCache(options);
     }
 
-    async get(options: MetaOptions): Promise<MetaInfo> {
+    async get(options: IMetaOptions): Promise<IMetaInfo> {
         function isEmpty(obj: Object) { return Object.keys(obj).length === 0; }
         function merge(...objList: Object[]) { return Object.assign({}, ...objList); }
 
-        const cache = merge(this.cachedInfo(options), { cached: true });
-        if (!isEmpty(cache))
+        const metaInfo = this.cachedInfo(options);
+        const cache = merge(metaInfo, { cached: true });
+        if (!isEmpty(metaInfo))
             return cache;
         return merge(await this.fetchInfo(options), { cached: false });
     }
@@ -60,16 +61,15 @@ export abstract class MetaManager {
         fs.writeFileSync(this.DBPath(), JSON.stringify(this.cache));
     }
 
-
-    inCache(options: MetaOptions): boolean {
+    inCache(options: IMetaOptions): boolean {
         return this.cache && this.uniqID(options) in this.cache;
     }
 
-    setCache(options: MetaOptions, metaInfo: MetaInfo) {
+    setCache(options: IMetaOptions, metaInfo: IMetaInfo) {
         this.cache[this.uniqID(options)] = metaInfo;
     }
 
-    fetchCache(options: MetaOptions): MetaInfo {
+    fetchCache(options: IMetaOptions): IMetaInfo {
         return this.cache[this.uniqID(options)];
     }
 }

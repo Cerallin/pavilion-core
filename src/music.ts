@@ -1,5 +1,5 @@
 import { MusicBrainzApi, ICoverArtArchive } from 'musicbrainz-api';
-import { MetaManager, MetaOptions } from './manager';
+import { MetaManager, IMetaOptions } from './manager';
 import { name, version } from '../package.json';
 import axios from 'axios';
 
@@ -16,11 +16,11 @@ const config = {
 
 const mbApi = new MusicBrainzApi(config);
 
-interface MusicOptions extends MetaOptions {
+interface IMusicOptions extends IMetaOptions {
     discID: string
 }
 
-interface MusicInfo {
+interface IMusicInfo {
     title?: string;
     artists?: Array<string>;
     publishDate?: string;
@@ -35,7 +35,7 @@ export default class MusicManager extends MetaManager {
         return this.config.dbPath + '/' + this.dbFilename;
     };
 
-    uniqID(options: MusicOptions): string {
+    uniqID(options: IMusicOptions): string {
         return options.discID;
     }
 
@@ -58,10 +58,10 @@ export default class MusicManager extends MetaManager {
         return headers.location
     }
 
-    async fetchInfo(options: MusicOptions): Promise<MusicInfo> {
+    async fetchInfo(options: IMusicOptions): Promise<IMusicInfo> {
         const discID = options.discID;
         const iRel = await mbApi.lookupRelease(discID);
-        let musicInfo: MusicInfo = {
+        let musicInfo: IMusicInfo = {
             title: iRel.title,
             publishDate: iRel.date,
             language: iRel['text-representation'].language,

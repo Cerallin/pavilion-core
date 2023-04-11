@@ -1,14 +1,14 @@
 import BookManager from './src/book';
 import MusicManager from './src/music';
-import { MetaConfig } from './src/manager';
+import { IMetaConfig } from './src/manager';
 
 module.exports.MetaManager = class {
-    config: MetaConfig;
+    config: IMetaConfig;
 
     book: BookManager;
     music: MusicManager;
 
-    constructor(config: MetaConfig) {
+    constructor(config: IMetaConfig) {
         this.config = config;
         this.book = new BookManager(config);
         this.music = new MusicManager(config);
