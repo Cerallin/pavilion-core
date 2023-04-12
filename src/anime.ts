@@ -29,17 +29,17 @@ export default class BookManager extends MetaManager {
         const meta = await bgm.getSubject(options.subject_id);
 
         return {
-            title: meta.name,
-            platform: meta.platform,
-            description: meta.summary,
-            date: meta.date,
-            episodes_count: meta.total_episodes,
+            title: meta?.name,
+            platform: meta?.platform,
+            description: meta?.summary,
+            date: meta?.date,
+            episodes_count: meta?.total_episodes,
             thumbnail:
-                meta.images.large ||
-                meta.images.medium ||
-                meta.images.common ||
-                meta.images.small ||
-                meta.images.grid,
+                meta?.images.large ||
+                meta?.images.medium ||
+                meta?.images.common ||
+                meta?.images.small ||
+                meta?.images.grid,
         };
     }
 

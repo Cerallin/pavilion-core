@@ -2,44 +2,48 @@ import { MetaManager, IMetaOptions, IMetaInfo } from './manager';
 import * as gb from '../api/google-book';
 import * as isbnDB from '../api/isbndb';
 
-interface IBookOptions extends IMetaOptions {
+interface IComicOptions extends IMetaOptions {
     isbn: number;
 };
 
-interface IBookInfo extends IMetaInfo {
+interface IComicInfo extends IMetaInfo {
     title?: string;
     authors?: Array<string>;
     publishDate?: string;
     description?: string;
     language?: string;
     thumbnail?: string;
+    pageCount?: number;
+    publisher?: string;
 };
 
-const BookInfoProperties = [
+const ComicInfoProperties = [
     'title',
     'authors',
     'publishDate',
     'description',
     'language',
     'thumbnail',
+    'pageCount',
+    'publisher',
 ] as const;
 
-function undefinedProperties(bookInfo: IBookInfo): string[] {
-    return BookInfoProperties.filter(prop => !bookInfo[prop]);
+function undefinedProperties(ComicInfo: IComicInfo): string[] {
+    return ComicInfoProperties.filter(prop => !ComicInfo[prop]);
 }
 
-export default class BookManager extends MetaManager {
-    dbFilename: string = "books.json";
+export default class ComicManager extends MetaManager {
+    dbFilename: string = "comics.json";
 
     DBPath(): string {
         return this.config.dbPath + '/' + this.dbFilename;
     };
 
-    uniqID(options: IBookOptions): string {
+    uniqID(options: IComicOptions): string {
         return '' + options.isbn; // to string
     }
 
-    async fetchFromGoogle(options: IBookOptions): Promise<IBookInfo> {
+    async fetchFromGoogle(options: IComicOptions): Promise<IComicInfo> {
         const volumeInfo = await gb.search(options.isbn);
 
         return {
@@ -48,6 +52,8 @@ export default class BookManager extends MetaManager {
             publishDate: volumeInfo?.publishedDate,
             description: volumeInfo?.description,
             language: volumeInfo?.language,
+            pageCount: volumeInfo?.pageCount,
+            publisher: volumeInfo?.publisher,
             thumbnail:
                 volumeInfo?.imageLinks?.extraLarge ||
                 volumeInfo?.imageLinks?.large ||
@@ -55,7 +61,7 @@ export default class BookManager extends MetaManager {
         };
     }
 
-    async fetchFromISBNDB(options: IBookOptions): Promise<IBookInfo> {
+    async fetchFromISBNDB(options: IComicOptions): Promise<IComicInfo> {
         const meta = await isbnDB.find(options.isbn);
 
         return {
@@ -65,21 +71,23 @@ export default class BookManager extends MetaManager {
             publishDate: meta?.date_published,
             language: meta?.language,
             thumbnail: meta?.image,
+            pageCount: meta?.pages,
+            publisher: meta?.publisher,
         };
     }
 
-    async fetchInfo(options: IBookOptions): Promise<IBookInfo> {
-        var bookInfo: IBookInfo = await this.fetchFromGoogle(options);
+    async fetchInfo(options: IComicOptions): Promise<IComicInfo> {
+        var ComicInfo: IComicInfo = await this.fetchFromGoogle(options);
 
-        const properties = undefinedProperties(bookInfo);
+        const properties = undefinedProperties(ComicInfo);
         if (properties.length) {
             const isbnDBMeta = await this.fetchFromISBNDB(options);
             properties.forEach((prop) => {
-                bookInfo[prop] = isbnDBMeta[prop];
+                ComicInfo[prop] = isbnDBMeta[prop];
             })
         }
 
-        this.setCache(options, bookInfo);
-        return bookInfo;
+        this.setCache(options, ComicInfo);
+        return ComicInfo;
     }
 }
