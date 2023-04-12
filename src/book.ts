@@ -1,37 +1,18 @@
-import * as google from '@googleapis/books';
-import { MetaManager, IMetaOptions } from './manager';
-import axios from '../axios';
-
-axios.defaults.headers.common['Authorization'] = process.env['ISBNDB_API_KEY'];
+import { MetaManager, IMetaOptions, IMetaInfo } from './manager';
+import * as gb from '../api/google-book';
+import * as isbnDB from '../api/isbndb';
 
 interface IBookOptions extends IMetaOptions {
-    isbn: number
+    isbn: number;
 };
 
-interface IBookInfo {
+interface IBookInfo extends IMetaInfo {
     title?: string;
     authors?: Array<string>;
     publishDate?: string;
     description?: string;
     language?: string;
     thumbnail?: string;
-};
-
-interface IISBNDBMeta {
-    authors: string[],
-    dimensions: string,
-    date_published: string,
-    binding: string,
-    image: string,
-    isbn: string,
-    isbn13: string,
-    isbn10: string,
-    language: string,
-    msrp: string,
-    pages: number,
-    publisher: string,
-    title: string,
-    title_long: string,
 };
 
 const BookInfoProperties = [
@@ -59,16 +40,8 @@ export default class BookManager extends MetaManager {
     }
 
     async fetchFromGoogle(options: IBookOptions): Promise<IBookInfo> {
-        const { status, data } = await google.books('v1').volumes.list({
-            q: `isbn:${options.isbn}`,
-            maxResults: 1,
-        })
-        if (status !== 200 || !data.totalItems || !data.items?.length) {
-            // TODO log
-            return {};
-        }
+        const volumeInfo = await gb.search(options.isbn);
 
-        const volumeInfo = data.items[0].volumeInfo || {};
         return {
             title: volumeInfo?.title,
             authors: volumeInfo?.authors,
@@ -78,16 +51,13 @@ export default class BookManager extends MetaManager {
             thumbnail:
                 volumeInfo?.imageLinks?.extraLarge ||
                 volumeInfo?.imageLinks?.large ||
-                volumeInfo?.imageLinks?.medium ||
-                volumeInfo?.imageLinks?.small ||
-                volumeInfo?.imageLinks?.thumbnail ||
-                volumeInfo?.imageLinks?.smallThumbnail
+                volumeInfo?.imageLinks?.medium
         };
     }
 
     async fetchFromISBNDB(options: IBookOptions): Promise<IBookInfo> {
-        const { status, data } = await axios.get('https://api2.isbndb.com/book/' + options.isbn);
-        const meta: IISBNDBMeta = data.book;
+        const meta = await isbnDB.find(options.isbn);
+
         return {
             title: meta.title_long,
             // no description

@@ -1,26 +1,11 @@
-import { MusicBrainzApi, ICoverArtArchive } from 'musicbrainz-api';
-import { MetaManager, IMetaOptions } from './manager';
-import { name, version } from '../package.json';
-import axios from 'axios';
-
-const config = {
-    // API base URL, default: 'https://musicbrainz.org' (optionsal)
-    baseUrl: 'https://musicbrainz.org',
-
-    appName: name,
-    appVersion: version,
-
-    // Your e-mail address, required for submitting ISRCs
-    appMail: 'cerallin@cerallin.top',
-};
-
-const mbApi = new MusicBrainzApi(config);
+import { MetaManager, IMetaOptions, IMetaInfo } from './manager';
+import * as mbApi from '../api/musicbrainz';
 
 interface IMusicOptions extends IMetaOptions {
-    discID: string
+    discID: string;
 }
 
-interface IMusicInfo {
+interface IMusicInfo extends IMetaInfo {
     title?: string;
     artists?: Array<string>;
     publishDate?: string;
@@ -39,25 +24,6 @@ export default class MusicManager extends MetaManager {
         return options.discID;
     }
 
-    async browseArtists(discID: string, limit: number = 3): Promise<string[]> {
-        const res = await mbApi.browseArtists({ release: discID, limit: limit });
-        return res.artists.map(artist => artist.name);
-    }
-
-    async coverArt(discID: string, caArchive: ICoverArtArchive): Promise<string> {
-        if (!caArchive.front) {
-            return "";
-        }
-        const { headers } = await axios.get(
-            `https://coverartarchive.org/release/${discID}/front`, {
-            maxRedirects: 0,
-            validateStatus: function (status) {
-                return status == 307 || (status <= 200 && status < 300);
-            },
-        });
-        return headers.location
-    }
-
     async fetchInfo(options: IMusicOptions): Promise<IMusicInfo> {
         const discID = options.discID;
         const iRel = await mbApi.lookupRelease(discID);
@@ -68,8 +34,8 @@ export default class MusicManager extends MetaManager {
         };
         // artists and coverArt
         const [artists, coverArt] = await Promise.all([
-            this.browseArtists(discID),
-            this.coverArt(discID, iRel['cover-art-archive']),
+            mbApi.browseArtists(discID),
+            mbApi.coverArt(discID, iRel['cover-art-archive']),
         ]);
         musicInfo.artists = artists;
         musicInfo.cover = coverArt;
