@@ -4,7 +4,7 @@ import ComicManager from './src/comic';
 import MusicManager from './src/music';
 import { IMetaConfig } from './src/manager';
 
-module.exports.MetaManager = class {
+export class MetaManager {
     config: IMetaConfig;
 
     anime: AnimeManager;
