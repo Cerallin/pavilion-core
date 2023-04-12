@@ -4,6 +4,8 @@ import ComicManager from './src/comic';
 import MusicManager from './src/music';
 import { IMetaConfig } from './src/manager';
 
+export { IMetaConfig, IMetaInfo, IMetaOptions, AbstractManager } from './src/manager';
+
 export class MetaManager {
     config: IMetaConfig;
 
@@ -19,5 +21,12 @@ export class MetaManager {
         this.book = new BookManager(config);
         this.comic = new ComicManager(config);
         this.music = new MusicManager(config);
+    }
+
+    saveAll() {
+        this.anime.save();
+        this.book.save();
+        this.comic.save();
+        this.music.save();
     }
 }

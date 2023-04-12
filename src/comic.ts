@@ -1,4 +1,4 @@
-import { MetaManager, IMetaOptions, IMetaInfo } from './manager';
+import { AbstractManager, IMetaOptions, IMetaInfo } from './manager';
 import * as gb from '../api/google-book';
 import * as isbnDB from '../api/isbndb';
 
@@ -7,11 +7,8 @@ interface IComicOptions extends IMetaOptions {
 };
 
 interface IComicInfo extends IMetaInfo {
-    title?: string;
     authors?: Array<string>;
-    publishDate?: string;
     description?: string;
-    language?: string;
     thumbnail?: string;
     pageCount?: number;
     publisher?: string;
@@ -32,7 +29,7 @@ function undefinedProperties(ComicInfo: IComicInfo): string[] {
     return ComicInfoProperties.filter(prop => !ComicInfo[prop]);
 }
 
-export default class ComicManager extends MetaManager {
+export default class ComicManager extends AbstractManager {
     dbFilename: string = "comics.json";
 
     DBPath(): string {
@@ -49,7 +46,7 @@ export default class ComicManager extends MetaManager {
         return {
             title: volumeInfo?.title,
             authors: volumeInfo?.authors,
-            publishDate: volumeInfo?.publishedDate,
+            date: volumeInfo?.publishedDate,
             description: volumeInfo?.description,
             language: volumeInfo?.language,
             pageCount: volumeInfo?.pageCount,
@@ -68,7 +65,7 @@ export default class ComicManager extends MetaManager {
             title: meta?.title_long,
             // no description
             authors: meta?.authors,
-            publishDate: meta?.date_published,
+            date: meta?.date_published,
             language: meta?.language,
             thumbnail: meta?.image,
             pageCount: meta?.pages,

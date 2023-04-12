@@ -1,4 +1,4 @@
-import { MetaManager, IMetaOptions, IMetaInfo } from './manager';
+import { AbstractManager, IMetaOptions, IMetaInfo } from './manager';
 import * as mbApi from '../api/musicbrainz';
 
 interface IMusicOptions extends IMetaOptions {
@@ -6,14 +6,11 @@ interface IMusicOptions extends IMetaOptions {
 }
 
 interface IMusicInfo extends IMetaInfo {
-    title?: string;
     artists?: Array<string>;
-    publishDate?: string;
-    language?: string;
     cover?: string;
 }
 
-export default class MusicManager extends MetaManager {
+export default class MusicManager extends AbstractManager {
     dbFilename: string = "music.json";
 
     DBPath(): string {
@@ -29,7 +26,7 @@ export default class MusicManager extends MetaManager {
         const iRel = await mbApi.lookupRelease(discID);
         let musicInfo: IMusicInfo = {
             title: iRel.title,
-            publishDate: iRel.date,
+            date: iRel.date,
             language: iRel['text-representation'].language,
         };
         // artists and coverArt

@@ -1,4 +1,4 @@
-import { MetaManager, IMetaOptions, IMetaInfo } from './manager';
+import { AbstractManager, IMetaOptions, IMetaInfo } from './manager';
 import * as bgm from '../api/bangumi';
 
 interface IAnimeOptions extends IMetaOptions {
@@ -6,15 +6,13 @@ interface IAnimeOptions extends IMetaOptions {
 }
 
 interface IAnimeInfo extends IMetaInfo {
-    title?: string;
     platform?: string;
     description?: string;
-    date?: string;
     thumbnail?: string;
     episodes_count?: number;
 };
 
-export default class BookManager extends MetaManager {
+export default class BookManager extends AbstractManager {
     dbFilename: string = "anime.json";
 
     DBPath(): string {

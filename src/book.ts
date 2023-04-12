@@ -1,4 +1,4 @@
-import { MetaManager, IMetaOptions, IMetaInfo } from './manager';
+import { AbstractManager, IMetaOptions, IMetaInfo } from './manager';
 import * as gb from '../api/google-book';
 import * as isbnDB from '../api/isbndb';
 
@@ -7,11 +7,8 @@ interface IBookOptions extends IMetaOptions {
 };
 
 interface IBookInfo extends IMetaInfo {
-    title?: string;
     authors?: Array<string>;
-    publishDate?: string;
     description?: string;
-    language?: string;
     thumbnail?: string;
 };
 
@@ -28,7 +25,7 @@ function undefinedProperties(bookInfo: IBookInfo): string[] {
     return BookInfoProperties.filter(prop => !bookInfo[prop]);
 }
 
-export default class BookManager extends MetaManager {
+export default class BookManager extends AbstractManager {
     dbFilename: string = "books.json";
 
     DBPath(): string {
@@ -45,7 +42,7 @@ export default class BookManager extends MetaManager {
         return {
             title: volumeInfo?.title,
             authors: volumeInfo?.authors,
-            publishDate: volumeInfo?.publishedDate,
+            date: volumeInfo?.publishedDate,
             description: volumeInfo?.description,
             language: volumeInfo?.language,
             thumbnail:
@@ -62,7 +59,7 @@ export default class BookManager extends MetaManager {
             title: meta?.title_long,
             // no description
             authors: meta?.authors,
-            publishDate: meta?.date_published,
+            date: meta?.date_published,
             language: meta?.language,
             thumbnail: meta?.image,
         };

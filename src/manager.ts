@@ -8,9 +8,13 @@ export interface IMetaConfig {
 
 export interface IMetaOptions { };
 
-export interface IMetaInfo { };
+export interface IMetaInfo {
+    title?: string,
+    language?: string,
+    date?: string,
+};
 
-export abstract class MetaManager {
+export abstract class AbstractManager {
     config: IMetaConfig;
     cache: Object = {};
 
@@ -44,7 +48,7 @@ export abstract class MetaManager {
         return this.fetchCache(options);
     }
 
-    async get(options: IMetaOptions): Promise<IMetaInfo> {
+    async get(options: IMetaOptions): Promise<IMetaInfo & { cached: boolean }> {
         function isEmpty(obj: Object) { return Object.keys(obj).length === 0; }
         function merge(...objList: Object[]) { return Object.assign({}, ...objList); }
 
