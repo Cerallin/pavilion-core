@@ -2,7 +2,8 @@
   "name": "pavilion-core",
   "version": "1.0.1",
   "description": "Metadata manager for anime, books, comics, games and music.",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",

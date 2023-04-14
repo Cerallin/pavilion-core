@@ -6,6 +6,8 @@
         "resolveJsonModule": true
     },
     "include": [
-        "*.ts",
+        "api/*.ts",
+        "src/*.ts",
+        "*.ts"
     ]
 }

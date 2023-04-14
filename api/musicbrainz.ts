@@ -1,13 +1,15 @@
-import { name, version } from '../package.json';
 import axios from '../axios';
 import { MusicBrainzApi, ICoverArtArchive, IRelease } from 'musicbrainz-api';
+
+const package_name = process.env.npm_package_name;
+const package_version = process.env.npm_package_version;
 
 const config = {
     // API base URL, default: 'https://musicbrainz.org' (optionsal)
     baseUrl: 'https://musicbrainz.org',
 
-    appName: name,
-    appVersion: version,
+    appName: package_name,
+    appVersion: package_version,
 
     // Your e-mail address, required for submitting ISRCs
     appMail: 'cerallin@cerallin.top',

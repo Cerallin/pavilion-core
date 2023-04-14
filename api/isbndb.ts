@@ -26,9 +26,14 @@ interface IISBNDBMeta {
 };
 
 export async function find(isbn: number): Promise<IISBNDBMeta> {
-    const { data } = await axiosInstance()
-        .get('https://api2.isbndb.com/book/' + isbn);
-    const meta: IISBNDBMeta = data.book;
+    const { status, data } = await axiosInstance()
+        .get('https://api2.isbndb.com/book/' + isbn, {
+            validateStatus: function (status) {
+                return status == 404 || (status <= 200 && status < 300);
+            },
+        });
+    if (status == 404)
+        return undefined;
 
-    return meta;
+    return data.book;
 }
