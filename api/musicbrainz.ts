@@ -1,21 +1,14 @@
 import axios from '../axios';
 import { MusicBrainzApi, ICoverArtArchive, IRelease } from 'musicbrainz-api';
+import { package_name, package_version } from '../ua';
 
-const package_name = process.env.npm_package_name;
-const package_version = process.env.npm_package_version;
-
-const config = {
+const mbApi = new MusicBrainzApi({
     // API base URL, default: 'https://musicbrainz.org' (optionsal)
     baseUrl: 'https://musicbrainz.org',
 
     appName: package_name,
     appVersion: package_version,
-
-    // Your e-mail address, required for submitting ISRCs
-    appMail: 'cerallin@cerallin.top',
-};
-
-const mbApi = new MusicBrainzApi(config);
+});
 
 export function lookupRelease(discID): Promise<IRelease> {
     return mbApi.lookupRelease(discID);
@@ -27,13 +20,19 @@ export async function coverArt(
     if (!caArchive.front) {
         return "";
     }
-    const { headers } = await axios().get(
+    const { status, headers } = await axios().get(
         `https://coverartarchive.org/release/${discID}/front`, {
         maxRedirects: 0,
         validateStatus: function (status) {
-            return status == 307 || (status <= 200 && status < 300);
+            return status == 307 ||
+                status == 404 ||
+                (status <= 200 && status < 300);
         },
     });
+
+    if (status == 404) {
+        return "";
+    }
 
     return headers.location;
 }
