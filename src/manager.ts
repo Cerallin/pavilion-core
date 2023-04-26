@@ -1,9 +1,7 @@
 import * as fs from 'fs';
-import { logger } from 'hexo-log';
 
 export interface IMetaConfig {
     dbPath: string,
-    logger?,
 };
 
 export interface IMetaOptions { };
